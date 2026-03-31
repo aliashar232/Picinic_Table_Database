@@ -26,25 +26,31 @@
 #define INIT_SIZE 5  
 
 typedef struct {
-    char *type;
-    int id;
-}
-Table;
+    char **types;
+    int *ids;
+} Table;
 
 typedef struct {
-    char *NB_name;
-    int NB_id;
-}
-NeighbourhoodTable;
+    char **names;
+    int *ids;
+} NeighbourhoodTable;
 
 typedef struct{
     int tableID;
+    int siteID;
     int tableTypeID;
     int surfaceMaterialID;
     int structuralMaterialID;
+    char *streetAvenue;
     int neighborhoodID;
     char *ward;
-}PicnicTable;
+    char *latitude;
+    char *longitude;
+} PicnicTableEntry;
+
+typedef struct{
+    PicnicTableEntry *entries;
+} PicnicTable;
 
 
 /*
