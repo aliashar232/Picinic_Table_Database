@@ -11,8 +11,18 @@
 
 //You may include other original headers as you see fit
 #include "DB.h"
+#include "DB_impl.h"
+#include <stdio.h>
+#include <stdlib.h>
+
 
 int main(int argc, char *argv[]){
+    printf("Testing DB_create...\n");
+    DB_create();
+
+    
+
+
 
 
     return 0;

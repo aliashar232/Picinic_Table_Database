@@ -131,5 +131,7 @@ void reportByWard();
  */
 void freeDB();
 
+void DB_create();
+
 
 #endif
