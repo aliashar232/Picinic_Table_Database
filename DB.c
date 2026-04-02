@@ -15,7 +15,6 @@
 
 DataBase *Db;
 
-
 void DB_create() {
     //Error checking for malloc of Db.
     Db = malloc(sizeof(DataBase));
@@ -25,7 +24,6 @@ void DB_create() {
     }
 
     //Allocating the memory for general tables.
-
     Db->tableTypeTable = malloc(sizeof(Table));
     Db->surfaceMaterialTable = malloc(sizeof(Table));
     Db->structuralMaterialTable = malloc(sizeof(Table));
@@ -33,7 +31,6 @@ void DB_create() {
     Db->picnicTableTable = malloc(sizeof(PicnicTable));
 
     //Allocating memeory for internal arrays of the tables.
-
     Db->tableTypeTable->types = malloc(INIT_SIZE * sizeof(char *));
     Db->tableTypeTable->ids = malloc(INIT_SIZE * sizeof(int));
 
@@ -81,9 +78,6 @@ void DB_create() {
             fprintf(stderr, "Memory allocation failed.\n");
             exit(EXIT_FAILURE);
     }
-
-
-    
 }
 
 int countEntries(char *memberName, char * value){
@@ -93,35 +87,27 @@ int countEntries(char *memberName, char * value){
             if (Db->tableTypeTable->types[i] && strcmp(Db->tableTypeTable->types[i], value) == 0) {
                 count++;
             }
-        }
-        else if (strcmp(memberName, "Surface Material") == 0) {
+        } else if (strcmp(memberName, "Surface Material") == 0) {
             if (Db->surfaceMaterialTable->types[i] && strcmp(Db->surfaceMaterialTable->types[i], value) == 0) {
                 count++;
             }
-        }
-        else if (strcmp(memberName, "Structural Material") == 0) {
+        } else if (strcmp(memberName, "Structural Material") == 0) {
             if (Db->structuralMaterialTable->types[i] && strcmp(Db->structuralMaterialTable->types[i], value) == 0) {
                 count++;
             }
-        }
-        else if (strcmp(memberName, "Neighborhood ID") == 0) {
+        } else if (strcmp(memberName, "Neighborhood ID") == 0) {
             if (Db->picnicTableTable->entries[i].neighborhoodID == atoi(value)) {
                 count++;
             }
-        }
-
-        else if (strcmp(memberName, "Neighbourhood Name") == 0) {
+        } else if (strcmp(memberName, "Neighbourhood Name") == 0) {
             if (Db->neighborhoodTable->names[i] && strcmp(Db->neighborhoodTable->names[i], value) == 0) {
                 count++;
             }
-        }
-
-        else if (strcmp(memberName, "Ward") == 0) {
+        } else if (strcmp(memberName, "Ward") == 0) {
             if (Db->picnicTableTable->entries[i].ward && strcmp(Db->picnicTableTable->entries[i].ward, value) == 0) {
                 count++;
             }
-        }
-        else {
+        } else {
             fprintf(stderr, "INVALID MEMBER.\n");
             exit(EXIT_FAILURE);
         }
@@ -140,9 +126,10 @@ void importDB(const char *filename) {
 
     char line[256];
     fgets(line, sizeof(line), fp); // header skipped
+
     while (fgets(line, sizeof(line), fp) && index < INIT_SIZE) {
         char *token;
-        //ID is Parsed
+        // ID is Parsed
         token = strtok(line, ",");
         Db->picnicTableTable->entries[index].tableID = atoi(token);
 
@@ -157,8 +144,8 @@ void importDB(const char *filename) {
         else if (strcmp(token, "Round Picnic Table") == 0) {
             Db->picnicTableTable->entries[index].tableTypeID = 2;
         }
-    
-        // Surface Material ID is parsed and converted to integer accordingly.
+
+        // Surface Material ID is parsed
         token = strtok(NULL, ",");
         if (strcmp(token, "Metal") == 0) {
             Db->picnicTableTable->entries[index].surfaceMaterialID = 0;
@@ -170,8 +157,7 @@ void importDB(const char *filename) {
             Db->picnicTableTable->entries[index].surfaceMaterialID = 2;
         }
 
-
-        // Structural Material ID is parsed and converted to integer accordingly.
+        // Structural Material ID is parsed
         token = strtok(NULL, ",");
         if (strcmp(token, "Aggregate") == 0) {
             Db->picnicTableTable->entries[index].structuralMaterialID = 0;
@@ -215,40 +201,17 @@ void importDB(const char *filename) {
         //to theri respective string values.
 
         printf("Read ID: %d\n", Db->picnicTableTable->entries[index].tableID);
-
         printf("Read TYPE ID: %d\n",  Db->picnicTableTable->entries[index].tableTypeID);
-
         printf("Read SurfaceMaterialID: %d\n", Db->picnicTableTable->entries[index].surfaceMaterialID);
-
         printf("Read StructuralMaterialID: %d\n", Db->picnicTableTable->entries[index].structuralMaterialID);
-
         printf("Read Street/Aveneue: %s\n",Db->picnicTableTable->entries[index].streetAvenue);
-
         printf("Read NeighbourhoodID: %d\n",Db->picnicTableTable->entries[index].neighborhoodID);
-
         printf("Read Neighbourhood Names: %s\n",Db->neighborhoodTable->names[index]);
-
         printf("Read Ward: %s\n", Db->picnicTableTable->entries[index].ward);
-
         printf("Read Latitude: %s\n",  Db->picnicTableTable->entries[index].latitude);
-
         printf("Read longitude: %s\n",Db->picnicTableTable->entries[index].longitude );
 
-
-
-
-
-
-    
-
         index++;
-
-        
-
-
-
-
-
     }
     fclose(fp);
 }
@@ -263,46 +226,34 @@ void exportDB(const char *filename) {
     //header is printed to the output file.
     fprintf(fp, "ID,Table Type,Surface Material,Structural Material,Street/Avenue,Neighborhood ID,Neighborhood Name,Ward,Latitude,Longitude\n");
 
-    
-    //Since we need to convert the ids to the string values,
-    //i have iterated the whole picnic tabletable and assign the string values for printing to the output file.
-    //There were 3 members that was converted, Table Type, Surface Material and structural material.
-    //The rest were printed as they were before.
     for (int i = 0; i < INIT_SIZE; i++) {
         char *TableType;
         char *SurfaceMaterial;
         char *StructuralMaterial;
 
-        if(Db->picnicTableTable->entries[i].tableTypeID == 0) {
+        if (Db->picnicTableTable->entries[i].tableTypeID == 0) {
             TableType = "Other Table";
-        }
-        else if(Db->picnicTableTable->entries[i].tableTypeID == 1) {
+        } else if (Db->picnicTableTable->entries[i].tableTypeID == 1) {
             TableType = "Square Picnic Table";
-        }
-        else if(Db->picnicTableTable->entries[i].tableTypeID == 2) {
+        } else if (Db->picnicTableTable->entries[i].tableTypeID == 2) {
             TableType = "Round Picnic Table";
         }
 
-        if(Db->picnicTableTable->entries[i].surfaceMaterialID == 0) {
+        if (Db->picnicTableTable->entries[i].surfaceMaterialID == 0) {
             SurfaceMaterial = "Metal";
-        }
-        else if(Db->picnicTableTable->entries[i].surfaceMaterialID == 1) {
+        } else if (Db->picnicTableTable->entries[i].surfaceMaterialID == 1) {
             SurfaceMaterial = "Unknown";
-        }
-        else if(Db->picnicTableTable->entries[i].surfaceMaterialID == 2) {
+        } else if (Db->picnicTableTable->entries[i].surfaceMaterialID == 2) {
             SurfaceMaterial = "Wood";
         }
 
-        if(Db->picnicTableTable->entries[i].structuralMaterialID == 0) {
+        if (Db->picnicTableTable->entries[i].structuralMaterialID == 0) {
             StructuralMaterial = "Aggregate";
-        }
-        else if(Db->picnicTableTable->entries[i].structuralMaterialID == 1) {
+        } else if (Db->picnicTableTable->entries[i].structuralMaterialID == 1) {
             StructuralMaterial = "Metal";
-        }
-        else if(Db->picnicTableTable->entries[i].structuralMaterialID == 2) {
+        } else if (Db->picnicTableTable->entries[i].structuralMaterialID == 2) {
             StructuralMaterial = "Unknown";
-        }
-        else if(Db->picnicTableTable->entries[i].structuralMaterialID == 3) {
+        } else if (Db->picnicTableTable->entries[i].structuralMaterialID == 3) {
             StructuralMaterial = "Wood";
         }
 
@@ -318,21 +269,35 @@ void exportDB(const char *filename) {
                 Db->picnicTableTable->entries[i].latitude,
                 Db->picnicTableTable->entries[i].longitude
         );
-
-    
-        
-
-        
-
-
-
-        
     }
-    
-    
 
     fclose(fp);
 }
 
+void sortByMember(char *memberName) {
+    if (strcmp(memberName, "Table Type") == 0) {
+        
+    } else if (strcmp(memberName, "Surface Material") == 0) {
 
+    } else if (strcmp(memberName, "Structural Material") == 0) {
 
+    } else if (strcmp(memberName, "Neighborhood Name") == 0) {
+
+    } else if (strcmp(memberName, "Ward") == 0) {
+        
+    }
+    // I have no way to indicate error, this is... not ideal
+    // The invariant here is weird with the string input to this function
+    // Why aren't we using an enum? The set of columns of a picnic table is necessarily hardcoded...
+}
+
+void editTableEntry(int tableID, char *memberName, char *value) {
+    PicnicTableEntry *entry = &Db->picnicTableTable->entries[tableID];
+    if (strcmp(memberName, "Table Type") == 0) {
+        entry->tableTypeID = findOrAddToTable(Db->tableTypeTable, value);
+    } else if (strcmp(memberName, "Surface Material") == 0) {
+        entry->surfaceMaterialID = findOrAddToTable(Db->surfaceMaterialTable, value);
+    } else if (strcmp(memberName, "Structural Material") == 0) {
+        entry->structuralMaterialID = findOrAddToTable(Db->structuralMaterialTable, value);
+    }
+}

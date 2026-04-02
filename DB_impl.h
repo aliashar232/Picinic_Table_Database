@@ -16,5 +16,8 @@
 #ifndef DB_IMPL_H
 #define DB_IMPL_H
 
+#include <stdlib.h>
+
+size_t findOrAddToTable(Table *table, char *value);
 
 #endif
