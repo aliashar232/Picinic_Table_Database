@@ -129,3 +129,203 @@ int countEntries(char *memberName, char * value){
     return count;
 }
 
+void importDB(const char *filename) {
+    FILE *fp = fopen(filename, "r");
+    if (fp == NULL) {
+        fprintf(stderr, "Error, could not open file");
+        exit(EXIT_FAILURE);
+    }
+
+    int index = 0;
+
+    char line[256];
+    fgets(line, sizeof(line), fp); // header skipped
+    while (fgets(line, sizeof(line), fp) && index < INIT_SIZE) {
+        char *token;
+        //ID is Parsed
+        token = strtok(line, ",");
+        Db->picnicTableTable->entries[index].tableID = atoi(token);
+
+        //Table Type ID is parsed
+        token = strtok(NULL, ",");
+        if (strcmp(token, "Other Table") == 0) {
+            Db->picnicTableTable->entries[index].tableTypeID = 0;
+        }
+        else if (strcmp(token, "Square Picnic Table") == 0) {
+            Db->picnicTableTable->entries[index].tableTypeID = 1;
+        }
+        else if (strcmp(token, "Round Picnic Table") == 0) {
+            Db->picnicTableTable->entries[index].tableTypeID = 2;
+        }
+    
+        // Surface Material ID is parsed
+        token = strtok(NULL, ",");
+        if (strcmp(token, "Metal") == 0) {
+            Db->picnicTableTable->entries[index].surfaceMaterialID = 0;
+        }
+        else if (strcmp(token, "Unknown") == 0) {
+            Db->picnicTableTable->entries[index].surfaceMaterialID = 1;
+        }
+        else if (strcmp(token, "Wood") == 0) {
+            Db->picnicTableTable->entries[index].surfaceMaterialID = 2;
+        }
+
+
+        // Structural Material ID is parsed
+        token = strtok(NULL, ",");
+        if (strcmp(token, "Aggregate") == 0) {
+            Db->picnicTableTable->entries[index].structuralMaterialID = 0;
+        }
+        else if (strcmp(token, "Metal") == 0) {
+            Db->picnicTableTable->entries[index].structuralMaterialID = 1;
+        }
+        else if (strcmp(token, "Unknown") == 0) {
+            Db->picnicTableTable->entries[index].structuralMaterialID = 2;
+        }
+        else if (strcmp(token, "Wood") == 0) {
+            Db->picnicTableTable->entries[index].structuralMaterialID = 3;
+        }
+
+
+        // Street/Avenue is parsed
+        token = strtok(NULL, ",");
+        Db->picnicTableTable->entries[index].streetAvenue = strdup(token);
+
+        // Neighborhood ID is parsed
+        token = strtok(NULL, ",");
+        Db->picnicTableTable->entries[index].neighborhoodID = atoi(token);
+
+        // Neighbourhood Name is parsed
+        token = strtok(NULL, ",");
+        Db->neighborhoodTable->names[index] = strdup(token);
+
+        // Ward is parsed
+        token = strtok(NULL, ",");
+        Db->picnicTableTable->entries[index].ward = strdup(token);
+
+        // Latitude is parsed
+        token = strtok(NULL, ",");
+        Db->picnicTableTable->entries[index].latitude = strdup(token);
+
+        // Longitude is parsed
+        token = strtok(NULL, ",");
+        Db->picnicTableTable->entries[index].longitude = strdup(token);
+
+        printf("Read ID: %d\n", Db->picnicTableTable->entries[index].tableID);
+
+        printf("Read TYPE ID: %d\n",  Db->picnicTableTable->entries[index].tableTypeID);
+
+        printf("Read SurfaceMaterialID: %d\n", Db->picnicTableTable->entries[index].surfaceMaterialID);
+
+        printf("Read StructuralMaterialID: %d\n", Db->picnicTableTable->entries[index].structuralMaterialID);
+
+        printf("Read Street/Aveneue: %s\n",Db->picnicTableTable->entries[index].streetAvenue);
+
+        printf("Read NeighbourhoodID: %d\n",Db->picnicTableTable->entries[index].neighborhoodID);
+
+        printf("Read Neighbourhood Names: %s\n",Db->neighborhoodTable->names[index]);
+
+        printf("Read Ward: %s\n", Db->picnicTableTable->entries[index].ward);
+
+        printf("Read Latitude: %s\n",  Db->picnicTableTable->entries[index].latitude);
+
+        printf("Read longitude: %s\n",Db->picnicTableTable->entries[index].longitude );
+
+
+
+
+
+
+    
+
+        index++;
+
+        
+
+
+
+
+
+    }
+    fclose(fp);
+}
+
+void exportDB(const char *filename) {
+    FILE *fp = fopen(filename, "w");
+    if (fp == NULL) {
+        fprintf(stderr, "Error, could not open file");
+        exit(EXIT_FAILURE);
+    }
+
+    fprintf(fp, "ID,Table Type,Surface Material,Structural Material,Street/Avenue,Neighborhood ID,Neighborhood Name,Ward,Latitude,Longitude\n");
+
+    
+
+    for (int i = 0; i < INIT_SIZE; i++) {
+        char *TableType;
+        char *SurfaceMaterial;
+        char *StructuralMaterial;
+
+        if(Db->picnicTableTable->entries[i].tableTypeID == 0) {
+            TableType = "Other Table";
+        }
+        else if(Db->picnicTableTable->entries[i].tableTypeID == 1) {
+            TableType = "Square Picnic Table";
+        }
+        else if(Db->picnicTableTable->entries[i].tableTypeID == 2) {
+            TableType = "Round Picnic Table";
+        }
+
+        if(Db->picnicTableTable->entries[i].surfaceMaterialID == 0) {
+            SurfaceMaterial = "Metal";
+        }
+        else if(Db->picnicTableTable->entries[i].surfaceMaterialID == 1) {
+            SurfaceMaterial = "Unknown";
+        }
+        else if(Db->picnicTableTable->entries[i].surfaceMaterialID == 2) {
+            SurfaceMaterial = "Wood";
+        }
+
+        if(Db->picnicTableTable->entries[i].structuralMaterialID == 0) {
+            StructuralMaterial = "Aggregate";
+        }
+        else if(Db->picnicTableTable->entries[i].structuralMaterialID == 1) {
+            StructuralMaterial = "Metal";
+        }
+        else if(Db->picnicTableTable->entries[i].structuralMaterialID == 2) {
+            StructuralMaterial = "Unknown";
+        }
+        else if(Db->picnicTableTable->entries[i].structuralMaterialID == 3) {
+            StructuralMaterial = "Wood";
+        }
+
+        fprintf(fp, "%d,%s,%s,%s,%s,%d,%s,%s,%s,%s\n",
+                Db->picnicTableTable->entries[i].tableID,
+                TableType,
+                SurfaceMaterial,
+                StructuralMaterial,
+                Db->picnicTableTable->entries[i].streetAvenue,
+                Db->picnicTableTable->entries[i].neighborhoodID,
+                Db->neighborhoodTable->names[i],
+                Db->picnicTableTable->entries[i].ward,
+                Db->picnicTableTable->entries[i].latitude,
+                Db->picnicTableTable->entries[i].longitude
+        );
+
+    
+        
+
+        
+
+
+
+        
+    }
+    
+    
+
+    fclose(fp);
+}
+
+
+

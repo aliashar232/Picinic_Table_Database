@@ -20,6 +20,11 @@ int main(int argc, char *argv[]){
     printf("Testing DB_create...\n");
     DB_create();
 
+    importDB("PicnicTable.csv");
+    exportDB("Output.csv");
+
+     
+
     
 
 

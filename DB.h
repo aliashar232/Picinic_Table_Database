@@ -133,5 +133,7 @@ void freeDB();
 
 void DB_create();
 
+void importDB(const char *filename);
+void exportDB(const char *filename);
 
 #endif
