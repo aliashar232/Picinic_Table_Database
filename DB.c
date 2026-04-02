@@ -146,7 +146,7 @@ void importDB(const char *filename) {
         token = strtok(line, ",");
         Db->picnicTableTable->entries[index].tableID = atoi(token);
 
-        //Table Type ID is parsed
+        //Table Type ID is parsed and cnoverted to integer accordingly.
         token = strtok(NULL, ",");
         if (strcmp(token, "Other Table") == 0) {
             Db->picnicTableTable->entries[index].tableTypeID = 0;
@@ -158,7 +158,7 @@ void importDB(const char *filename) {
             Db->picnicTableTable->entries[index].tableTypeID = 2;
         }
     
-        // Surface Material ID is parsed
+        // Surface Material ID is parsed and converted to integer accordingly.
         token = strtok(NULL, ",");
         if (strcmp(token, "Metal") == 0) {
             Db->picnicTableTable->entries[index].surfaceMaterialID = 0;
@@ -171,7 +171,7 @@ void importDB(const char *filename) {
         }
 
 
-        // Structural Material ID is parsed
+        // Structural Material ID is parsed and converted to integer accordingly.
         token = strtok(NULL, ",");
         if (strcmp(token, "Aggregate") == 0) {
             Db->picnicTableTable->entries[index].structuralMaterialID = 0;
@@ -210,6 +210,9 @@ void importDB(const char *filename) {
         // Longitude is parsed
         token = strtok(NULL, ",");
         Db->picnicTableTable->entries[index].longitude = strdup(token);
+
+        //I have printed all of this to check if the parsing is done correctly, and the integer values are printed according
+        //to theri respective string values.
 
         printf("Read ID: %d\n", Db->picnicTableTable->entries[index].tableID);
 
@@ -257,10 +260,14 @@ void exportDB(const char *filename) {
         exit(EXIT_FAILURE);
     }
 
+    //header is printed to the output file.
     fprintf(fp, "ID,Table Type,Surface Material,Structural Material,Street/Avenue,Neighborhood ID,Neighborhood Name,Ward,Latitude,Longitude\n");
 
     
-
+    //Since we need to convert the ids to the string values,
+    //i have iterated the whole picnic tabletable and assign the string values for printing to the output file.
+    //There were 3 members that was converted, Table Type, Surface Material and structural material.
+    //The rest were printed as they were before.
     for (int i = 0; i < INIT_SIZE; i++) {
         char *TableType;
         char *SurfaceMaterial;
