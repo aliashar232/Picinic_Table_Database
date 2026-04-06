@@ -77,8 +77,10 @@ int countEntries(char *memberName, char * value){
     int count = 0;
     for (int i = 0; i < INIT_SIZE; i++) {
         if (strcmp(memberName, "Table Type") == 0) {
-            if (Db->tableTypeTable->types[i] && strcmp(Db->tableTypeTable->types[i], value) == 0) {
-                count++;
+            if (strcmp(value, "Other Table") == 0) {
+                if (Db->picnicTableTable->entries[i].tableTypeID == 0) {
+                    count++;
+                }
             }
         } else if (strcmp(memberName, "Surface Material") == 0) {
             if (Db->surfaceMaterialTable->types[i] && strcmp(Db->surfaceMaterialTable->types[i], value) == 0) {
@@ -140,7 +142,17 @@ void importDB(const char *filename) {
 
         // Street/Avenue is parsed
         token = strtok(NULL, ",");
-        Db->picnicTableTable->entries[index].streetAvenue = strdup(token);
+        if (token != NULL) {
+            Db->picnicTableTable->entries[index].streetAvenue = malloc(strlen(token) + 1);
+            if (Db->picnicTableTable->entries[index].streetAvenue == NULL){
+                fprintf(stderr, "Memory allocation failed.\n");
+                exit(EXIT_FAILURE);
+            }
+            strcpy(Db->picnicTableTable->entries[index].streetAvenue, token);
+        }
+        else {
+            Db->picnicTableTable->entries[index].streetAvenue = NULL;
+        }
 
         // Neighborhood ID is parsed
         token = strtok(NULL, ",");
@@ -148,23 +160,64 @@ void importDB(const char *filename) {
 
         // Neighbourhood Name is parsed
         token = strtok(NULL, ",");
-        Db->neighborhoodTable->names[index] = strdup(token);
-
+        if (token != NULL) {
+            Db->neighborhoodTable->names[index] = malloc(strlen(token) + 1);
+            if (Db->neighborhoodTable->names[index] == NULL){
+                fprintf(stderr, "Memory allocation failed.\n");
+                exit(EXIT_FAILURE);
+            }
+            strcpy(Db->neighborhoodTable->names[index], token);
+        }
+        else{
+        Db->neighborhoodTable->names[index] = NULL;
+        }
         // Ward is parsed
         token = strtok(NULL, ",");
-        Db->picnicTableTable->entries[index].ward = strdup(token);
-
+        if (token != NULL) {
+            Db->picnicTableTable->entries[index].ward = malloc(strlen(token) + 1);
+            if (Db->picnicTableTable->entries[index].ward == NULL){
+                fprintf(stderr, "Memory allocation failed.\n");
+                exit(EXIT_FAILURE);
+            }
+            strcpy(Db->picnicTableTable->entries[index].ward, token);
+        }
+        else{
+        Db->picnicTableTable->entries[index].ward = NULL;
+        }
         // Latitude is parsed
         token = strtok(NULL, ",");
-        Db->picnicTableTable->entries[index].latitude = strdup(token);
-
+        if (token != NULL) {
+            Db->picnicTableTable->entries[index].latitude = malloc(strlen(token) + 1);
+            if (Db->picnicTableTable->entries[index].latitude == NULL){
+                fprintf(stderr, "Memory allocation failed.\n");
+                exit(EXIT_FAILURE);
+            }
+            strcpy(Db->picnicTableTable->entries[index].latitude, token);
+        }
+        else {
+        Db->picnicTableTable->entries[index].latitude = NULL;
+        }
         // Longitude is parsed
         token = strtok(NULL, ",");
+<<<<<<< HEAD
         Db->picnicTableTable->entries[index].longitude = strdup(token);
 
         //I have printed all of this to check if the parsing is done correctly, and the integer values are printed according
         //to theri respective string values.
 
+=======
+        if (token != NULL) {
+            Db->picnicTableTable->entries[index].longitude = malloc(strlen(token) + 1);
+            if (Db->picnicTableTable->entries[index].longitude == NULL){
+                fprintf(stderr, "Memory allocation failed.\n");
+                exit(EXIT_FAILURE);
+            }
+            strcpy(Db->picnicTableTable->entries[index].longitude, token);
+        }
+        else {
+        Db->picnicTableTable->entries[index].longitude = NULL;
+        }
+>>>>>>> 7d14e23 (Relevant merge)
         printf("Read ID: %d\n", Db->picnicTableTable->entries[index].tableID);
         printf("Read TYPE ID: %d\n",  Db->picnicTableTable->entries[index].tableTypeID);
         printf("Read SurfaceMaterialID: %d\n", Db->picnicTableTable->entries[index].surfaceMaterialID);
@@ -197,7 +250,7 @@ void exportDB(const char *filename) {
         char *SurfaceMaterial = Db->surfaceMaterialTable->types[Db->picnicTableTable->entries[i].surfaceMaterialID];
         char *StructuralMaterial = Db->structuralMaterialTable->types[Db->picnicTableTable->entries[i].structuralMaterialID];
 
-        fprintf(fp, "%d,%s,%s,%s,%s,%d,%s,%s,%s,%s\n",
+        fprintf(fp, "%d,%s,%s,%s,%s,%d,%s,%s,%s,%s",
                 Db->picnicTableTable->entries[i].tableID,
                 TableType,
                 SurfaceMaterial,
