@@ -34,8 +34,8 @@ void DB_create() {
     if (Db->tableTypeTable == NULL || Db->surfaceMaterialTable == NULL|| 
         Db->structuralMaterialTable == NULL || 
         Db->neighborhoodTable == NULL || Db->picnicTableTable == NULL) {
-            fprintf(stderr, "Memory allocation failed.\n");
-            exit(EXIT_FAILURE);
+        fprintf(stderr, "Memory allocation failed.\n");
+        exit(EXIT_FAILURE);
     }
 
     //Allocating memeory for internal arrays of the tables.
@@ -43,8 +43,9 @@ void DB_create() {
     Db->surfaceMaterialTable->types = malloc(INIT_SIZE * sizeof(char *));
     Db->structuralMaterialTable->types = malloc(INIT_SIZE * sizeof(char *));
     Db->neighborhoodTable->names = malloc(INIT_SIZE * sizeof(char *));
+    Db->neighborhoodTable->ids = malloc(INIT_SIZE * sizeof(int));
 
-    if (!Db->tableTypeTable->types || !Db->surfaceMaterialTable->types || !Db->structuralMaterialTable->types || !Db->neighborhoodTable->names) {
+    if (!Db->tableTypeTable->types || !Db->surfaceMaterialTable->types || !Db->structuralMaterialTable->types || !Db->neighborhoodTable->names || !Db->neighborhoodTable->ids) {
         fprintf(stderr, "Memory allocation failed.\n");
         exit(EXIT_FAILURE);
     }
@@ -58,6 +59,7 @@ void DB_create() {
         Db->surfaceMaterialTable->types[i] = NULL;
         Db->structuralMaterialTable->types[i] = NULL;
         Db->neighborhoodTable->names[i] = NULL;
+        Db->neighborhoodTable->ids[i] = -1;
 
         Db->picnicTableTable->entries[i].tableID = 0;
         Db->picnicTableTable->entries[i].siteID = 0;
@@ -75,27 +77,39 @@ void DB_create() {
 
 int countEntries(char *memberName, char * value){
     int count = 0;
-    for (int i = 0; i < INIT_SIZE; i++) {
+    int targetID = -1;
+
+    if (strcmp(memberName, "Table Type") == 0) {
+        targetID = findOrAddToTable(Db->tableTypeTable, value);
+    } else if (strcmp(memberName, "Surface Material") == 0) {
+        targetID = findOrAddToTable(Db->surfaceMaterialTable, value);
+    } else if (strcmp(memberName, "Structural Material") == 0) {
+        targetID = findOrAddToTable(Db->structuralMaterialTable, value);
+    } else if (strcmp(memberName, "Neighborhood ID") == 0) {
+        targetID = atoi(value);
+    } else if (strcmp(memberName, "Neighborhood Name") == 0) {
+        targetID = findNeighborhoodID(value);
+    }
+
+    for (int i = 0; i < Db->picnicTableTable->count; i++) {
         if (strcmp(memberName, "Table Type") == 0) {
-            if (strcmp(value, "Other Table") == 0) {
-                if (Db->picnicTableTable->entries[i].tableTypeID == 0) {
-                    count++;
-                }
+            if (Db->picnicTableTable->entries[i].tableTypeID == targetID) {
+                count++;
             }
         } else if (strcmp(memberName, "Surface Material") == 0) {
-            if (Db->surfaceMaterialTable->types[i] && strcmp(Db->surfaceMaterialTable->types[i], value) == 0) {
+            if (Db->picnicTableTable->entries[i].surfaceMaterialID == targetID) {
                 count++;
             }
         } else if (strcmp(memberName, "Structural Material") == 0) {
-            if (Db->structuralMaterialTable->types[i] && strcmp(Db->structuralMaterialTable->types[i], value) == 0) {
+            if (Db->picnicTableTable->entries[i].structuralMaterialID == targetID) {
                 count++;
             }
         } else if (strcmp(memberName, "Neighborhood ID") == 0) {
-            if (Db->picnicTableTable->entries[i].neighborhoodID == atoi(value)) {
+            if (Db->picnicTableTable->entries[i].neighborhoodID == targetID) {
                 count++;
             }
         } else if (strcmp(memberName, "Neighbourhood Name") == 0) {
-            if (Db->neighborhoodTable->names[i] && strcmp(Db->neighborhoodTable->names[i], value) == 0) {
+            if (Db->picnicTableTable->entries[i].neighborhoodID == targetID) {
                 count++;
             }
         } else if (strcmp(memberName, "Ward") == 0) {
@@ -116,29 +130,34 @@ void importDB(const char *filename) {
         fprintf(stderr, "Error, could not open file");
         exit(EXIT_FAILURE);
     }
-
-    int index = 0;
-
+    
     char line[256];
     fgets(line, sizeof(line), fp); // header skipped
+    
+    size_t index = 0;
+    size_t capacity = INIT_SIZE;
 
-    while (fgets(line, sizeof(line), fp) && index < INIT_SIZE) {
+    while (fgets(line, sizeof(line), fp)) {
         char *token;
         // ID is Parsed
         token = strtok(line, ",");
         Db->picnicTableTable->entries[index].tableID = atoi(token);
+        printf("Read ID: %d\n", Db->picnicTableTable->entries[index].tableID);
 
         //Table Type ID is parsed and cnoverted to integer accordingly.
         token = strtok(NULL, ",");
         Db->picnicTableTable->entries[index].tableTypeID = findOrAddToTable(Db->tableTypeTable, token);
+        printf("Read TYPE ID: %d\n",  Db->picnicTableTable->entries[index].tableTypeID);
 
         // Surface Material ID is parsed
         token = strtok(NULL, ",");
         Db->picnicTableTable->entries[index].surfaceMaterialID = findOrAddToTable(Db->surfaceMaterialTable, token);
+        printf("Read SurfaceMaterialID: %d %s\n", Db->picnicTableTable->entries[index].surfaceMaterialID, token);
 
         // Structural Material ID is parsed
         token = strtok(NULL, ",");
         Db->picnicTableTable->entries[index].structuralMaterialID = findOrAddToTable(Db->structuralMaterialTable, token);
+        printf("Read StructuralMaterialID: %d %s\n", Db->picnicTableTable->entries[index].structuralMaterialID, token);
 
         // Street/Avenue is parsed
         token = strtok(NULL, ",");
@@ -153,6 +172,7 @@ void importDB(const char *filename) {
         else {
             Db->picnicTableTable->entries[index].streetAvenue = NULL;
         }
+        printf("Read Street: %s\n", Db->picnicTableTable->entries[index].streetAvenue);
 
         // Neighborhood ID is parsed
         token = strtok(NULL, ",");
@@ -161,16 +181,9 @@ void importDB(const char *filename) {
         // Neighbourhood Name is parsed
         token = strtok(NULL, ",");
         if (token != NULL) {
-            Db->neighborhoodTable->names[index] = malloc(strlen(token) + 1);
-            if (Db->neighborhoodTable->names[index] == NULL){
-                fprintf(stderr, "Memory allocation failed.\n");
-                exit(EXIT_FAILURE);
-            }
-            strcpy(Db->neighborhoodTable->names[index], token);
+            findOrAddNeighborhood(Db->picnicTableTable->entries[index].neighborhoodID, token);
         }
-        else{
-        Db->neighborhoodTable->names[index] = NULL;
-        }
+
         // Ward is parsed
         token = strtok(NULL, ",");
         if (token != NULL) {
@@ -210,18 +223,24 @@ void importDB(const char *filename) {
         else {
         Db->picnicTableTable->entries[index].longitude = NULL;
         }
-        printf("Read ID: %d\n", Db->picnicTableTable->entries[index].tableID);
-        printf("Read TYPE ID: %d\n",  Db->picnicTableTable->entries[index].tableTypeID);
-        printf("Read SurfaceMaterialID: %d\n", Db->picnicTableTable->entries[index].surfaceMaterialID);
         printf("Read StructuralMaterialID: %d\n", Db->picnicTableTable->entries[index].structuralMaterialID);
         printf("Read Street/Aveneue: %s\n",Db->picnicTableTable->entries[index].streetAvenue);
         printf("Read NeighbourhoodID: %d\n",Db->picnicTableTable->entries[index].neighborhoodID);
-        printf("Read Neighbourhood Names: %s\n",Db->neighborhoodTable->names[index]);
         printf("Read Ward: %s\n", Db->picnicTableTable->entries[index].ward);
         printf("Read Latitude: %s\n",  Db->picnicTableTable->entries[index].latitude);
         printf("Read longitude: %s\n",Db->picnicTableTable->entries[index].longitude );
 
         index++;
+
+        // automatically resizing array
+        if (index >= capacity) {
+            capacity *= 2;
+            Db->picnicTableTable->entries = realloc(Db->picnicTableTable->entries, capacity * sizeof(PicnicTableEntry));
+            if (!Db->picnicTableTable->entries) {
+                fprintf(stderr, "Memory allocation failed.\n");
+                exit(EXIT_FAILURE);
+            }
+        }
     }
     Db->picnicTableTable->count = index;
     fclose(fp);
@@ -235,7 +254,7 @@ void exportDB(const char *filename) {
     }
 
     //header is printed to the output file.
-    fprintf(fp, "ID,Table Type,Surface Material,Structural Material,Street/Avenue,Neighborhood ID,Neighborhood Name,Ward,Latitude,Longitude\n");
+    fprintf(fp, "Id,Table Type,Surface Material,Structural Material,Street/Avenue,Neighborhood ID,Neighborhood Name,Ward,Latitude,Longitude,Location\n");
 
     for (size_t i = 0; i < Db->picnicTableTable->count; i++) {
         writeEntryAsCSV(fp, &Db->picnicTableTable->entries[i]);
@@ -270,25 +289,21 @@ void editTableEntry(int tableID, char *memberName, char *value) {
 }
 
 void reportByNeighbourhood() {
-    // TODO: store this in table for performance
-    int neighbourhoodCount = 0;
-    for (int i = 0; Db->neighborhoodTable->names[i] != NULL; i++) {
-        neighbourhoodCount++;
+    // store each picnic table along with its ward
+    StringWithID *sortedPicnicTables = malloc(Db->picnicTableTable->count * sizeof(StringWithID));
+    for (size_t i = 0; i < Db->picnicTableTable->count; i++) {
+        StringWithID tuple = {findNeighborhoodName(Db->picnicTableTable->entries[i].neighborhoodID), i};
+        sortedPicnicTables[i] = tuple;
     }
-    StringWithID *sortedNeighbourhoods = malloc(neighbourhoodCount * sizeof(StringWithID));
-    for (int i = 0; i < neighbourhoodCount; i++) {
-        StringWithID tuple = {Db->neighborhoodTable->names[i], i};
-        sortedNeighbourhoods[i] = tuple;
-    }
-    qsort(sortedNeighbourhoods, neighbourhoodCount, sizeof(StringWithID), compareStringWithID);
+    qsort(sortedPicnicTables, Db->picnicTableTable->count, sizeof(StringWithID), compareStringWithID);
 
-    for (int i = 0; i < neighbourhoodCount; i++) {
-        printf("%s:\n", sortedNeighbourhoods[i].value);
-        for (int j = 0; j < Db->picnicTableTable->count; j++) {
-            if (Db->picnicTableTable->entries[j].neighborhoodID == sortedNeighbourhoods[i].id) {
-                writeEntryAsCSV(stdout, &Db->picnicTableTable->entries[j]);
-            }
+    int lastNeighborhoodID = -1;
+    for (size_t i = 0; i < Db->picnicTableTable->count; i++) {
+        if (lastNeighborhoodID == -1 || lastNeighborhoodID != Db->picnicTableTable->entries[sortedPicnicTables[i].id].neighborhoodID) {
+            lastNeighborhoodID = Db->picnicTableTable->entries[sortedPicnicTables[i].id].neighborhoodID;
+            printf("%s:\n", sortedPicnicTables[i].value);
         }
+        writeEntryAsCSV(stdout, &Db->picnicTableTable->entries[sortedPicnicTables[i].id]);
     }
 }
 
@@ -303,10 +318,10 @@ void reportByWard() {
 
     char *lastWard = NULL;
     for (size_t i = 0; i < Db->picnicTableTable->count; i++) {
-        if (!lastWard || strcmp(Db->picnicTableTable->entries[i].ward, lastWard) != 0) {
-            lastWard = Db->picnicTableTable->entries[i].ward;
+        if (!lastWard || strcmp(sortedPicnicTables[i].value, lastWard) != 0) {
+            lastWard = sortedPicnicTables[i].value;
             printf("%s:\n", lastWard);
         }
-        writeEntryAsCSV(stdout, &Db->picnicTableTable->entries[i]);
+        writeEntryAsCSV(stdout, &Db->picnicTableTable->entries[sortedPicnicTables[i].id]);
     }
 }

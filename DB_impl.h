@@ -34,4 +34,23 @@ int compareByWard(const void*, const void*);
 
 void writeEntryAsCSV(FILE *fp, const PicnicTableEntry *entry);
 
+size_t findOrAddNeighborhood(int id, char *value);
+int findNeighborhoodID(const char *neighborhoodName);
+char * findNeighborhoodName(int id);
+
+typedef struct {
+    int siteID : 12;
+    int tableTypeID : 12;
+    int surfaceMaterialID : 12;
+    int structuralMaterialID : 12;
+    int neighborhoodID : 16;
+} PicnicTableEntryCompressedMembers;
+
+typedef struct {
+    char *streetAvenue;
+    char *ward;
+    char *latitude;
+    char *longitude;
+} PicnicTableEntryStringMembers;
+
 #endif

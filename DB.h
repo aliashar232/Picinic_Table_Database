@@ -31,6 +31,7 @@ typedef struct {
 } Table;
 
 typedef struct {
+    int *ids;
     char **names;
 } NeighbourhoodTable;
 
