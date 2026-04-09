@@ -142,22 +142,18 @@ void importDB(const char *filename) {
         // ID is Parsed
         token = strtok(line, ",");
         Db->picnicTableTable->entries[index].tableID = atoi(token);
-        printf("Read ID: %d\n", Db->picnicTableTable->entries[index].tableID);
 
         //Table Type ID is parsed and cnoverted to integer accordingly.
         token = strtok(NULL, ",");
         Db->picnicTableTable->entries[index].tableTypeID = findOrAddToTable(Db->tableTypeTable, token);
-        printf("Read TYPE ID: %d\n",  Db->picnicTableTable->entries[index].tableTypeID);
 
         // Surface Material ID is parsed
         token = strtok(NULL, ",");
         Db->picnicTableTable->entries[index].surfaceMaterialID = findOrAddToTable(Db->surfaceMaterialTable, token);
-        printf("Read SurfaceMaterialID: %d %s\n", Db->picnicTableTable->entries[index].surfaceMaterialID, token);
 
         // Structural Material ID is parsed
         token = strtok(NULL, ",");
         Db->picnicTableTable->entries[index].structuralMaterialID = findOrAddToTable(Db->structuralMaterialTable, token);
-        printf("Read StructuralMaterialID: %d %s\n", Db->picnicTableTable->entries[index].structuralMaterialID, token);
 
         // Street/Avenue is parsed
         token = strtok(NULL, ",");
@@ -172,7 +168,6 @@ void importDB(const char *filename) {
         else {
             Db->picnicTableTable->entries[index].streetAvenue = NULL;
         }
-        printf("Read Street: %s\n", Db->picnicTableTable->entries[index].streetAvenue);
 
         // Neighborhood ID is parsed
         token = strtok(NULL, ",");
@@ -223,12 +218,6 @@ void importDB(const char *filename) {
         else {
         Db->picnicTableTable->entries[index].longitude = NULL;
         }
-        printf("Read StructuralMaterialID: %d\n", Db->picnicTableTable->entries[index].structuralMaterialID);
-        printf("Read Street/Aveneue: %s\n",Db->picnicTableTable->entries[index].streetAvenue);
-        printf("Read NeighbourhoodID: %d\n",Db->picnicTableTable->entries[index].neighborhoodID);
-        printf("Read Ward: %s\n", Db->picnicTableTable->entries[index].ward);
-        printf("Read Latitude: %s\n",  Db->picnicTableTable->entries[index].latitude);
-        printf("Read longitude: %s\n",Db->picnicTableTable->entries[index].longitude );
 
         index++;
 
