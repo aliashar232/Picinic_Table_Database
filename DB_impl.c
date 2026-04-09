@@ -49,3 +49,29 @@ int compareByWard(const void *a, const void *b) {
     const PicnicTableEntry *picnicTable1 = a, *picnicTable2 = b;
     return strcmp(picnicTable1->ward, picnicTable2->ward);
 }
+
+int compareStringWithID(const void *a, const void *b) {
+    const StringWithID *tuple1 = a, *tuple2 = b;
+    return strcmp(tuple1->value, tuple2->value);
+}
+
+void writeEntryAsCSV(FILE *fp, const PicnicTableEntry *entry) {
+    char *TableType = Db->tableTypeTable->types[entry->tableTypeID];
+    char *SurfaceMaterial = Db->surfaceMaterialTable->types[entry->surfaceMaterialID];
+    char *StructuralMaterial = Db->structuralMaterialTable->types[entry->structuralMaterialID];
+
+    fprintf(fp, "%d,%s,%s,%s,%s,%d,%s,%s,%s,%s,\"(%s, %s)\"\n",
+        entry->tableID,
+        TableType,
+        SurfaceMaterial,
+        StructuralMaterial,
+        entry->streetAvenue,
+        entry->neighborhoodID,
+        Db->neighborhoodTable->names[entry->neighborhoodID],
+        entry->ward,
+        entry->latitude,
+        entry->longitude,
+        entry->latitude,
+        entry->longitude
+    );
+}

@@ -16,11 +16,22 @@
 #ifndef DB_IMPL_H
 #define DB_IMPL_H
 
+#include <stdio.h>
+
+typedef struct {
+    char *value;
+    int id;
+} StringWithID;
+
+int compareStringWithID(const void*, const void*);
+
 int findOrAddToTable(Table *table, char *value);
 int compareByTableType(const void*, const void*);
 int compareBySurfaceMaterial(const void*, const void*);
 int compareByStructuralMaterial(const void*, const void*);
 int compareByNeighborhoodName(const void*, const void*);
 int compareByWard(const void*, const void*);
+
+void writeEntryAsCSV(FILE *fp, PicnicTableEntry *entry);
 
 #endif

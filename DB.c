@@ -237,23 +237,8 @@ void exportDB(const char *filename) {
     //header is printed to the output file.
     fprintf(fp, "ID,Table Type,Surface Material,Structural Material,Street/Avenue,Neighborhood ID,Neighborhood Name,Ward,Latitude,Longitude\n");
 
-    for (int i = 0; i < INIT_SIZE; i++) {
-        char *TableType = Db->tableTypeTable->types[Db->picnicTableTable->entries[i].tableTypeID];
-        char *SurfaceMaterial = Db->surfaceMaterialTable->types[Db->picnicTableTable->entries[i].surfaceMaterialID];
-        char *StructuralMaterial = Db->structuralMaterialTable->types[Db->picnicTableTable->entries[i].structuralMaterialID];
-
-        fprintf(fp, "%d,%s,%s,%s,%s,%d,%s,%s,%s,%s",
-                Db->picnicTableTable->entries[i].tableID,
-                TableType,
-                SurfaceMaterial,
-                StructuralMaterial,
-                Db->picnicTableTable->entries[i].streetAvenue,
-                Db->picnicTableTable->entries[i].neighborhoodID,
-                Db->neighborhoodTable->names[i],
-                Db->picnicTableTable->entries[i].ward,
-                Db->picnicTableTable->entries[i].latitude,
-                Db->picnicTableTable->entries[i].longitude
-        );
+    for (size_t i = 0; i < Db->picnicTableTable->count; i++) {
+        writeEntryAsCSV(fp, &Db->picnicTableTable->entries[i]);
     }
 
     fclose(fp);
@@ -281,5 +266,47 @@ void editTableEntry(int tableID, char *memberName, char *value) {
         entry->surfaceMaterialID = findOrAddToTable(Db->surfaceMaterialTable, value);
     } else if (strcmp(memberName, "Structural Material") == 0) {
         entry->structuralMaterialID = findOrAddToTable(Db->structuralMaterialTable, value);
+    }
+}
+
+void reportByNeighbourhood() {
+    // TODO: store this in table for performance
+    int neighbourhoodCount = 0;
+    for (int i = 0; Db->neighborhoodTable->names[i] != NULL; i++) {
+        neighbourhoodCount++;
+    }
+    StringWithID *sortedNeighbourhoods = malloc(neighbourhoodCount * sizeof(StringWithID));
+    for (int i = 0; i < neighbourhoodCount; i++) {
+        StringWithID tuple = {Db->neighborhoodTable->names[i], i};
+        sortedNeighbourhoods[i] = tuple;
+    }
+    qsort(sortedNeighbourhoods, neighbourhoodCount, sizeof(StringWithID), compareStringWithID);
+
+    for (int i = 0; i < neighbourhoodCount; i++) {
+        printf("%s:\n", sortedNeighbourhoods[i].value);
+        for (int j = 0; j < Db->picnicTableTable->count; j++) {
+            if (Db->picnicTableTable->entries[j].neighborhoodID == sortedNeighbourhoods[i].id) {
+                writeEntryAsCSV(stdout, &Db->picnicTableTable->entries[j]);
+            }
+        }
+    }
+}
+
+void reportByWard() {
+    // store each picnic table along with its ward
+    StringWithID *sortedPicnicTables = malloc(Db->picnicTableTable->count * sizeof(StringWithID));
+    for (size_t i = 0; i < Db->picnicTableTable->count; i++) {
+        StringWithID tuple = {Db->picnicTableTable->entries[i].ward, i};
+        sortedPicnicTables[i] = tuple;
+    }
+    qsort(sortedPicnicTables, Db->picnicTableTable->count, sizeof(StringWithID), compareStringWithID);
+
+    char *lastWard = NULL;
+    for (size_t i = 0; i < Db->picnicTableTable->count; i++) {
+        if (!lastWard || strcmp(Db->picnicTableTable->entries[i].ward, lastWard) != 0) {
+            lastWard = Db->picnicTableTable->entries[i].ward;
+            printf("%s:\n", lastWard);
+        }
+        writeEntryAsCSV(stdout, &Db->picnicTableTable->entries[i]);
     }
 }
