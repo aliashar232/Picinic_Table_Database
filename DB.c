@@ -199,13 +199,6 @@ void importDB(const char *filename) {
         }
         // Longitude is parsed
         token = strtok(NULL, ",");
-<<<<<<< HEAD
-        Db->picnicTableTable->entries[index].longitude = strdup(token);
-
-        //I have printed all of this to check if the parsing is done correctly, and the integer values are printed according
-        //to theri respective string values.
-
-=======
         if (token != NULL) {
             Db->picnicTableTable->entries[index].longitude = malloc(strlen(token) + 1);
             if (Db->picnicTableTable->entries[index].longitude == NULL){
@@ -217,7 +210,6 @@ void importDB(const char *filename) {
         else {
         Db->picnicTableTable->entries[index].longitude = NULL;
         }
->>>>>>> 7d14e23 (Relevant merge)
         printf("Read ID: %d\n", Db->picnicTableTable->entries[index].tableID);
         printf("Read TYPE ID: %d\n",  Db->picnicTableTable->entries[index].tableTypeID);
         printf("Read SurfaceMaterialID: %d\n", Db->picnicTableTable->entries[index].surfaceMaterialID);
