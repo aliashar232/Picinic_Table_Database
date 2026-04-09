@@ -178,6 +178,7 @@ void importDB(const char *filename) {
 
         index++;
     }
+    Db->picnicTableTable->count = index;
     fclose(fp);
 }
 

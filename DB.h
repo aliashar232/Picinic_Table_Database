@@ -48,6 +48,7 @@ typedef struct{
 } PicnicTableEntry;
 
 typedef struct{
+    size_t count;
     PicnicTableEntry *entries;
 } PicnicTable;
 
