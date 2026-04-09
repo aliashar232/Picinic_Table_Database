@@ -21,7 +21,7 @@ int main(int argc, char *argv[]){
     FILE *in_file;
     DB_create();
     if (argc != 3) {
-        fprintf(stderr, "Usage: dashboard -b <in_binary_file>\n       dashboard -c <in_csv_file>");
+        fprintf(stderr, "Usage: dashboard -b <in_binary_file>\n       dashboard -c <in_csv_file>\n");
         exit(EXIT_FAILURE);
     }
 
