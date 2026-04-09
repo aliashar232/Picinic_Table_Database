@@ -91,7 +91,41 @@ int main(int argc, char *argv[]){
                 }
                 break;
             case 3:
-                //sortBy();
+                int sortcode;
+                printf("Enter a criteria to sort by (1. TT, 2. SM, 3. StM, 4. NN, 5. W): \n");
+                scanf("%d", &sortcode);
+                char *sortmember;
+
+                switch (sortcode) {
+                        case 1:
+                            sortmember = "Table Type";
+                            break;
+                        case 2:
+                            sortmember = "Surface Material";
+                            break;
+                        case 3:
+                            sortmember = "Structural Material";
+                            break;
+                        case 4:
+                            sortmember = "Neighborhood ID";
+                            break;
+                        case 5:
+                            sortmember = "Neighborhood Name";
+                            break;
+                        case 6:
+                            sortmember = "Ward";
+                            break;
+                        default:
+                            fprintf(stderr, "Invalid sort code\n");
+                            exit(EXIT_FAILURE);
+
+                    sortByMember(sortmember);
+                    exportDB("sorted_out.csv");
+
+                    printf("DB exported to %s.csv to verify", sortmember);
+
+
+                }
                 break;
             case 4:
                 //editEntry();
