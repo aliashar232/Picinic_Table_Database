@@ -139,9 +139,11 @@ void importDB(const char *filename) {
 
     while (fgets(line, sizeof(line), fp)) {
         char *token;
+        Db->picnicTableTable->entries[index].tableID = index;
+
         // ID is Parsed
         token = strtok(line, ",");
-        Db->picnicTableTable->entries[index].tableID = atoi(token);
+        Db->picnicTableTable->entries[index].siteID = atoi(token);
 
         //Table Type ID is parsed and cnoverted to integer accordingly.
         token = strtok(NULL, ",");
@@ -243,7 +245,7 @@ void exportDB(const char *filename) {
     }
 
     //header is printed to the output file.
-    fprintf(fp, "Id,Table Type,Surface Material,Structural Material,Street/Avenue,Neighborhood ID,Neighborhood Name,Ward,Latitude,Longitude,Location\n");
+    fprintf(fp, "Id,Table Type,Surface Material,Structural Material,Street / Avenue,Neighbourhood Id,Neighbourhood Name,Ward,Latitude,Longitude,Location\n");
 
     for (size_t i = 0; i < Db->picnicTableTable->count; i++) {
         writeEntryAsCSV(fp, &Db->picnicTableTable->entries[i]);

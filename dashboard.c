@@ -13,23 +13,34 @@
 #include "DB.h"
 #include "DB_impl.h"
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 
 
 int main(int argc, char *argv[]){
     FILE *in_file;
     DB_create();
-    if (argc != 2) {
-        fprintf(stderr, "Usage: fcopy in_file\n");
+    if (argc != 3) {
+        fprintf(stderr, "Usage: dashboard -b <in_binary_file>\n       dashboard -c <in_csv_file>");
         exit(EXIT_FAILURE);
     }
-    in_file = fopen(argv[1], "r");
-    if (in_file == NULL) {
-        fprintf(stderr, "Cannot open file %s\n", argv[1]);
-        exit(EXIT_FAILURE);
+
+    if (strcmp(argv[1], "-c") == 0) {
+        in_file = fopen(argv[2], "r");
+        if (in_file == NULL) {
+            fprintf(stderr, "Cannot open file %s\n", argv[2]);
+            exit(EXIT_FAILURE);
+        }
+        importDB(argv[2]);
+    } else if (strcmp(argv[1], "-b") == 0) {
+        in_file = fopen(argv[2], "rb");
+        if (in_file == NULL) {
+            fprintf(stderr, "Cannot open file %s\n", argv[2]);
+            exit(EXIT_FAILURE);
+        }
+        decompressDB(argv[2]);
     }
-    importDB(argv[1]);
-    
+   
     int choice = 0;
 
     while (choice != 7) {
@@ -46,7 +57,7 @@ int main(int argc, char *argv[]){
         switch (choice) {
             case 1:
                 if(choice == 1){
-                    printf("Enter a filename: ");
+                    printf("Enter filename: ");
                     scanf("%s", argv[1]);
                     exportDB(argv[1]);
                     break;
@@ -175,7 +186,9 @@ int main(int argc, char *argv[]){
                 }
                 break;
             case 6:
-                //compressDB();
+                printf("Enter filename: ");
+                scanf("%s", argv[1]);
+                compressDB(argv[1]);
                 break;
             case 7:
                 exit(EXIT_SUCCESS);

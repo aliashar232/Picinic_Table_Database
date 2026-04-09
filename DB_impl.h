@@ -46,11 +46,15 @@ typedef struct {
     int neighborhoodID : 16;
 } PicnicTableEntryCompressedMembers;
 
-typedef struct {
-    char *streetAvenue;
-    char *ward;
-    char *latitude;
-    char *longitude;
-} PicnicTableEntryStringMembers;
+void writeString(const char* str, FILE *fp);
+// reads a string of variable length, allocating caller-owned memory for it on the heap
+// returns the newly allocated string on the heap
+char *readString(FILE *fp);
+void writeTable(const Table *table, FILE *fp);
+// reads a table of heap-allocated strings from a file
+// reallocates table->entries
+void readTable(Table *table, FILE *fp);
+void compressDB(const char *filename);
+void decompressDB(const char *filename);
 
 #endif
