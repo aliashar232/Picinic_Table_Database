@@ -30,34 +30,34 @@ void DB_create() {
     Db->neighborhoodTable = malloc(sizeof(NeighbourhoodTable));
     Db->picnicTableTable = malloc(sizeof(PicnicTable));
 
+    // error checking for general tables.
+    if (Db->tableTypeTable == NULL || Db->surfaceMaterialTable == NULL|| 
+        Db->structuralMaterialTable == NULL || 
+        Db->neighborhoodTable == NULL || Db->picnicTableTable == NULL) {
+            fprintf(stderr, "Memory allocation failed.\n");
+            exit(EXIT_FAILURE);
+    }
+
     //Allocating memeory for internal arrays of the tables.
     Db->tableTypeTable->types = malloc(INIT_SIZE * sizeof(char *));
-    Db->tableTypeTable->ids = malloc(INIT_SIZE * sizeof(int));
-
     Db->surfaceMaterialTable->types = malloc(INIT_SIZE * sizeof(char *));
-    Db->surfaceMaterialTable->ids = malloc(INIT_SIZE * sizeof(int));
-
     Db->structuralMaterialTable->types = malloc(INIT_SIZE * sizeof(char *));
-    Db->structuralMaterialTable->ids = malloc(INIT_SIZE * sizeof(int));
-
     Db->neighborhoodTable->names = malloc(INIT_SIZE * sizeof(char *));
-    Db->neighborhoodTable->ids = malloc(INIT_SIZE * sizeof(int));
 
+    if (!Db->tableTypeTable->types || !Db->surfaceMaterialTable->types || !Db->structuralMaterialTable->types || !Db->neighborhoodTable->names) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        exit(EXIT_FAILURE);
+    }
+ 
+    Db->picnicTableTable->count = 0;
     Db->picnicTableTable->entries = malloc(INIT_SIZE * sizeof(PicnicTableEntry));
 
     // Initaializing the internal arrays of the table to NULL and 0.
     for (int i = 0; i < INIT_SIZE; i++) {
         Db->tableTypeTable->types[i] = NULL;
-        Db->tableTypeTable->ids[i] = 0;
-
         Db->surfaceMaterialTable->types[i] = NULL;
-        Db->surfaceMaterialTable->ids[i] = 0;
-
         Db->structuralMaterialTable->types[i] = NULL;
-        Db->structuralMaterialTable->ids[i] = 0;
-
         Db->neighborhoodTable->names[i] = NULL;
-        Db->neighborhoodTable->ids[i] = 0;
 
         Db->picnicTableTable->entries[i].tableID = 0;
         Db->picnicTableTable->entries[i].siteID = 0;
@@ -70,13 +70,6 @@ void DB_create() {
         Db->picnicTableTable->entries[i].latitude = NULL;
         Db->picnicTableTable->entries[i].longitude = NULL;
 
-    }
-    // final error checking for general tables.
-    if (Db->tableTypeTable == NULL || Db->surfaceMaterialTable == NULL|| 
-        Db->structuralMaterialTable == NULL || 
-        Db->neighborhoodTable == NULL || Db->picnicTableTable == NULL) {
-            fprintf(stderr, "Memory allocation failed.\n");
-            exit(EXIT_FAILURE);
     }
 }
 
@@ -135,43 +128,15 @@ void importDB(const char *filename) {
 
         //Table Type ID is parsed and cnoverted to integer accordingly.
         token = strtok(NULL, ",");
-        if (strcmp(token, "Other Table") == 0) {
-            Db->picnicTableTable->entries[index].tableTypeID = 0;
-        }
-        else if (strcmp(token, "Square Picnic Table") == 0) {
-            Db->picnicTableTable->entries[index].tableTypeID = 1;
-        }
-        else if (strcmp(token, "Round Picnic Table") == 0) {
-            Db->picnicTableTable->entries[index].tableTypeID = 2;
-        }
+        Db->picnicTableTable->entries[index].tableTypeID = findOrAddToTable(Db->tableTypeTable, token);
 
         // Surface Material ID is parsed
         token = strtok(NULL, ",");
-        if (strcmp(token, "Metal") == 0) {
-            Db->picnicTableTable->entries[index].surfaceMaterialID = 0;
-        }
-        else if (strcmp(token, "Unknown") == 0) {
-            Db->picnicTableTable->entries[index].surfaceMaterialID = 1;
-        }
-        else if (strcmp(token, "Wood") == 0) {
-            Db->picnicTableTable->entries[index].surfaceMaterialID = 2;
-        }
+        Db->picnicTableTable->entries[index].surfaceMaterialID = findOrAddToTable(Db->surfaceMaterialTable, token);
 
         // Structural Material ID is parsed
         token = strtok(NULL, ",");
-        if (strcmp(token, "Aggregate") == 0) {
-            Db->picnicTableTable->entries[index].structuralMaterialID = 0;
-        }
-        else if (strcmp(token, "Metal") == 0) {
-            Db->picnicTableTable->entries[index].structuralMaterialID = 1;
-        }
-        else if (strcmp(token, "Unknown") == 0) {
-            Db->picnicTableTable->entries[index].structuralMaterialID = 2;
-        }
-        else if (strcmp(token, "Wood") == 0) {
-            Db->picnicTableTable->entries[index].structuralMaterialID = 3;
-        }
-
+        Db->picnicTableTable->entries[index].structuralMaterialID = findOrAddToTable(Db->structuralMaterialTable, token);
 
         // Street/Avenue is parsed
         token = strtok(NULL, ",");
@@ -227,35 +192,9 @@ void exportDB(const char *filename) {
     fprintf(fp, "ID,Table Type,Surface Material,Structural Material,Street/Avenue,Neighborhood ID,Neighborhood Name,Ward,Latitude,Longitude\n");
 
     for (int i = 0; i < INIT_SIZE; i++) {
-        char *TableType;
-        char *SurfaceMaterial;
-        char *StructuralMaterial;
-
-        if (Db->picnicTableTable->entries[i].tableTypeID == 0) {
-            TableType = "Other Table";
-        } else if (Db->picnicTableTable->entries[i].tableTypeID == 1) {
-            TableType = "Square Picnic Table";
-        } else if (Db->picnicTableTable->entries[i].tableTypeID == 2) {
-            TableType = "Round Picnic Table";
-        }
-
-        if (Db->picnicTableTable->entries[i].surfaceMaterialID == 0) {
-            SurfaceMaterial = "Metal";
-        } else if (Db->picnicTableTable->entries[i].surfaceMaterialID == 1) {
-            SurfaceMaterial = "Unknown";
-        } else if (Db->picnicTableTable->entries[i].surfaceMaterialID == 2) {
-            SurfaceMaterial = "Wood";
-        }
-
-        if (Db->picnicTableTable->entries[i].structuralMaterialID == 0) {
-            StructuralMaterial = "Aggregate";
-        } else if (Db->picnicTableTable->entries[i].structuralMaterialID == 1) {
-            StructuralMaterial = "Metal";
-        } else if (Db->picnicTableTable->entries[i].structuralMaterialID == 2) {
-            StructuralMaterial = "Unknown";
-        } else if (Db->picnicTableTable->entries[i].structuralMaterialID == 3) {
-            StructuralMaterial = "Wood";
-        }
+        char *TableType = Db->tableTypeTable->types[Db->picnicTableTable->entries[i].tableTypeID];
+        char *SurfaceMaterial = Db->surfaceMaterialTable->types[Db->picnicTableTable->entries[i].surfaceMaterialID];
+        char *StructuralMaterial = Db->structuralMaterialTable->types[Db->picnicTableTable->entries[i].structuralMaterialID];
 
         fprintf(fp, "%d,%s,%s,%s,%s,%d,%s,%s,%s,%s\n",
                 Db->picnicTableTable->entries[i].tableID,
@@ -276,19 +215,16 @@ void exportDB(const char *filename) {
 
 void sortByMember(char *memberName) {
     if (strcmp(memberName, "Table Type") == 0) {
-        
+        qsort(Db->picnicTableTable->entries, Db->picnicTableTable->count, sizeof(PicnicTableEntry), compareByTableType);
     } else if (strcmp(memberName, "Surface Material") == 0) {
-
+        qsort(Db->picnicTableTable->entries, Db->picnicTableTable->count, sizeof(PicnicTableEntry), compareBySurfaceMaterial);
     } else if (strcmp(memberName, "Structural Material") == 0) {
-
+        qsort(Db->picnicTableTable->entries, Db->picnicTableTable->count, sizeof(PicnicTableEntry), compareByStructuralMaterial);
     } else if (strcmp(memberName, "Neighborhood Name") == 0) {
-
+        qsort(Db->picnicTableTable->entries, Db->picnicTableTable->count, sizeof(PicnicTableEntry), compareByNeighborhoodName);
     } else if (strcmp(memberName, "Ward") == 0) {
-        
+        qsort(Db->picnicTableTable->entries, Db->picnicTableTable->count, sizeof(PicnicTableEntry), compareByWard);
     }
-    // I have no way to indicate error, this is... not ideal
-    // The invariant here is weird with the string input to this function
-    // Why aren't we using an enum? The set of columns of a picnic table is necessarily hardcoded...
 }
 
 void editTableEntry(int tableID, char *memberName, char *value) {

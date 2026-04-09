@@ -16,8 +16,11 @@
 #ifndef DB_IMPL_H
 #define DB_IMPL_H
 
-#include <stdlib.h>
-
-size_t findOrAddToTable(Table *table, char *value);
+int findOrAddToTable(Table *table, char *value);
+int compareByTableType(const void*, const void*);
+int compareBySurfaceMaterial(const void*, const void*);
+int compareByStructuralMaterial(const void*, const void*);
+int compareByNeighborhoodName(const void*, const void*);
+int compareByWard(const void*, const void*);
 
 #endif

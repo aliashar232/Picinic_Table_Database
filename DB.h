@@ -13,6 +13,7 @@
 #ifndef DB_H
 #define DB_H
 
+#include <stdlib.h>
 /*
  * DECLARE AND TYPEDEF HERE THE STRUCTS Table, NeighbourhoodTable, AND PicnicTable
  * WHICH WILL BE FIELDS IN THE STRUCT DataBase BELOW. YOU MAY DECLARE ADDITIONAL
@@ -27,12 +28,10 @@
 
 typedef struct {
     char **types;
-    int *ids;
 } Table;
 
 typedef struct {
     char **names;
-    int *ids;
 } NeighbourhoodTable;
 
 typedef struct{
