@@ -91,6 +91,7 @@ int main(int argc, char *argv[]){
                 }
                 break;
             case 3:
+                if (choice == 3){
                 int sortcode;
                 printf("Enter a criteria to sort by (1. TT, 2. SM, 3. StM, 4. NN, 5. W): \n");
                 scanf("%d", &sortcode);
@@ -107,17 +108,15 @@ int main(int argc, char *argv[]){
                             sortmember = "Structural Material";
                             break;
                         case 4:
-                            sortmember = "Neighborhood ID";
-                            break;
-                        case 5:
                             sortmember = "Neighborhood Name";
                             break;
-                        case 6:
+                        case 5:
                             sortmember = "Ward";
                             break;
                         default:
                             fprintf(stderr, "Invalid sort code\n");
                             exit(EXIT_FAILURE);
+                    }
 
                     sortByMember(sortmember);
                     exportDB("sorted_out.csv");
@@ -128,7 +127,35 @@ int main(int argc, char *argv[]){
                 }
                 break;
             case 4:
-                //editEntry();
+                if (choice == 4) {
+                    int table_id;
+                    int membercode;
+                    char *member;
+                    char new_value[256];
+                    printf("Enter a numeric table entry to edit: \n");
+                    scanf("%d", &table_id);
+                    printf("Enter member code (1. TT, 2. SM, 3. StM): \n");
+                    scanf("%d", &membercode);
+                    printf("Enter value: \n");
+                    scanf(" %[^\n]", new_value);
+
+                    switch (membercode) {
+                        case 1:
+                            member = "Table Type";
+                            break;
+                        case 2:
+                            member = "Surface Material";
+                            break;
+                        case 3:
+                            member = "Structural Material";
+                            break;
+                        default:
+                            fprintf(stderr, "Invalid member code\n");
+                            exit(EXIT_FAILURE);
+                    }
+                    editTableEntry(table_id, member, new_value);
+                }
+                
                 break;
             case 5:
                 //report();
