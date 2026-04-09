@@ -32,6 +32,6 @@ int compareByStructuralMaterial(const void*, const void*);
 int compareByNeighborhoodName(const void*, const void*);
 int compareByWard(const void*, const void*);
 
-void writeEntryAsCSV(FILE *fp, PicnicTableEntry *entry);
+void writeEntryAsCSV(FILE *fp, const PicnicTableEntry *entry);
 
 #endif
