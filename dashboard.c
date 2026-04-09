@@ -158,8 +158,8 @@ int main(int argc, char *argv[]){
                 
                 break;
             case 5:
-                int reportcode;
                 printf("Enter a criteria to report by (1. Neighborhood, 2. Ward): \n");
+                int reportcode;
                 scanf("%d", &reportcode);
 
                 switch (reportcode) {
