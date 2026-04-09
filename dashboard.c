@@ -158,7 +158,21 @@ int main(int argc, char *argv[]){
                 
                 break;
             case 5:
-                //report();
+                int reportcode;
+                printf("Enter a criteria to report by (1. Neighborhood, 2. Ward): \n");
+                scanf("%d", &reportcode);
+
+                switch (reportcode) {
+                    case 1:
+                        reportByNeighbourhood();
+                        break;
+                    case 2:
+                        reportByWard();
+                        break;
+                    default:
+                        fprintf(stderr, "Invalid report code\n");
+                        exit(EXIT_FAILURE);
+                }
                 break;
             case 6:
                 //compressDB();
