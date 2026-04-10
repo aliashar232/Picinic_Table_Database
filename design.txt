@@ -1,0 +1,215 @@
+Design Document - CMPT 201 Assignment 3
+========================================
+
+Authors: Theo,Ashar,Lyra
+Lab Instructor: Dhara Wagh
+Lecture Instructor: Ardy
+
+1. Data Structure Choice
+------------------------
+
+We chose dynamically resizing arrays (with realloc) over linked lists
+for all tables. The main reasons:
+
+- Random access: The picnicTable is accessed by tableID index
+  constantly (editTableEntry, countEntries, reports). Arrays give O(1)
+  access; linked lists would require O(n) traversal every time.
+
+- Sorting: We use qsort() throughout the project for sortByMember and
+  the report functions. qsort works directly on contiguous arrays. With
+  linked lists we would need to copy into an array first, sort, then
+  rebuild the list, which adds complexity for no benefit.
+
+- Cache performance: Arrays store entries contiguously in memory, so
+  iterating through all records (which we do in countEntries,
+  exportDB, and the report functions) is cache-friendly.
+
+The drawback is that realloc can be expensive when the array grows,
+since it may copy the entire block. We mitigate this by starting at
+INIT_SIZE (5) and doubling the picnicTable capacity each time it fills
+up, giving amortized O(1) insertions. The lookup tables (tableType,
+surfaceMaterial, structuralMaterial) grow by one at a time since they
+stay small (typically under 10 entries).
+
+
+2. Struct Design
+----------------
+
+We defined five struct types:
+
+- Table: Holds a NULL-terminated array of strings (char **types).
+  Used for the three lookup tables (tableType, surfaceMaterial,
+  structuralMaterial). The index into the array serves as the
+  integer code, so no separate id field is needed.
+
+- NeighbourhoodTable: Holds parallel arrays of ids (int *ids) and
+  names (char **names). We use the actual Neighbourhood Id from the
+  CSV as the code rather than assigning a new one, since the
+  assignment requires it. The ids array is sentinel-terminated with
+  -1, and names with NULL.
+
+- PicnicTableEntry: One record. Integer fields (tableTypeID,
+  surfaceMaterialID, structuralMaterialID) store codes that index
+  into the corresponding lookup tables. Latitude and longitude are
+  stored as strings rather than doubles to preserve the exact decimal
+  representation from the CSV, which is critical for the export
+  round-trip (diff must produce no differences).
+
+- PicnicTable: Wraps the entries array with a count field so we
+  always know how many records are loaded.
+
+- DataBase: Top-level container holding pointers to all five tables.
+  This is the single global variable (Db) as required.
+
+- PicnicTableEntryCompressedMembers: A bitfield struct used for
+  binary compression. Fields are: siteID (12 bits), tableTypeID
+  (12 bits), surfaceMaterialID (12 bits), structuralMaterialID
+  (12 bits), neighborhoodID (16 bits). This packs five integers
+  into 8 bytes instead of 20, cutting the fixed-width portion of
+  each record by more than half.
+
+- StringWithID: A helper struct pairing a string with an index,
+  used by reportByWard and reportByNeighbourhood to sort records
+  by a string field while keeping track of which picnicTable entry
+  each one came from.
+
+
+3. Key Design Decisions
+-----------------------
+
+3.1 Lookup tables populated simultaneously with picnicTable
+
+  The findOrAddToTable() helper is called during importDB for every
+  record. If the value already exists it returns the existing code;
+  otherwise it appends the value and returns the new code. This means
+  the lookup tables grow organically as the CSV is read, with no
+  hardcoding or pre-scanning pass.
+
+3.2 Latitude and longitude as strings
+
+  The CSV contains coordinates with up to 13 decimal digits
+  (e.g. 53.4902460605314). Storing these as doubles and printing
+  them back would risk floating-point rounding differences that
+  would cause the diff check to fail. Keeping them as strings
+  guarantees an exact round-trip.
+
+3.3 Ward stored as a string
+
+  Ward values like "WARD 05" contain both text and a number. Rather
+  than parsing out the number, we store the full string. This
+  simplifies export (just print it) and sorting (strcmp gives correct
+  ascending order since the format is consistent).
+
+3.4 editTableEntry uses findOrAddToTable
+
+  When editing a record's tableType, surfaceMaterial, or
+  structuralMaterial to a value that does not yet exist, the same
+  findOrAddToTable function adds the new value to the lookup table
+  and returns the new code. This maintains database integrity
+  automatically without any special-case logic.
+
+3.5 Export reconstructs the Location column
+
+  The CSV has a Location column formatted as "(lat, lon)". Rather
+  than storing this redundant field, we reconstruct it in
+  writeEntryAsCSV by printing the latitude and longitude inside
+  parentheses with quotes, exactly matching the original format.
+
+3.6 Reports use an auxiliary sorted array
+
+  reportByWard and reportByNeighbourhood build a temporary array of
+  StringWithID structs, sort that array alphabetically, then iterate
+  through it printing group headers when the value changes. This
+  avoids modifying the original picnicTable order.
+
+
+4. Compression Design
+---------------------
+
+The binary format is structured as follows:
+
+  [tableTypeTable]
+  [surfaceMaterialTable]
+  [structuralMaterialTable]
+  [neighbourhoodTable]
+  [picnicTable entries]
+
+Each lookup table is preceded by a 2-byte unsigned short indicating
+its length (number of entries). Each string in the file is preceded
+by a 1-byte length, followed by that many characters (no null
+terminator). This is more space-efficient than null-terminated strings
+because we avoid scanning for the terminator on read.
+
+The neighbourhood table writes all ids first (as unsigned shorts),
+then all names, so the fixed-width and variable-width portions are
+separated.
+
+Each picnicTable entry writes its five integer fields packed into a
+PicnicTableEntryCompressedMembers bitfield struct (8 bytes total),
+followed by the four variable-length string fields (streetAvenue,
+ward, latitude, longitude). The bitfield widths were chosen based on
+the data ranges: 12 bits for siteID (max 4095), 12 bits each for
+the three lookup codes (more than enough), and 16 bits for
+neighborhoodID (max 65535, accommodating all Edmonton neighbourhood
+codes).
+
+
+5. Module Organization
+----------------------
+
+- DB.h: Public API. Struct typedefs and function prototypes visible
+  to dashboard.c and any test programs.
+
+- DB_impl.h: Private helpers. Comparator functions, CSV writing,
+  lookup helpers, compression structs and functions. Not intended
+  for external use.
+
+- DB.c: Core logic. Contains the global Db definition, DB_create,
+  importDB, exportDB, countEntries, sortByMember, editTableEntry,
+  reportByWard, reportByNeighbourhood.
+
+- DB_impl.c: Helper implementations. findOrAddToTable,
+  findOrAddNeighborhood, all comparator functions, writeEntryAsCSV,
+  compression/decompression routines.
+
+- dashboard.c: Interactive menu loop. Parses command-line arguments
+  (-c for CSV, -b for binary), calls the DB API, and prompts the
+  user.
+
+This separation keeps the public API clean while allowing the
+implementation files to share private helpers through DB_impl.h.
+
+
+6. Issues List
+--------------
+
+Issue 1: CSV parsing with strtok and commas inside the Location field
+  The Location column contains a comma inside quotes, e.g.
+  "(53.49, -113.64)". However, since Location is the last column
+  and we reconstruct it from latitude/longitude, we simply stop
+  tokenizing after longitude and ignore the rest of the line. This
+  avoids needing a full quoted-CSV parser.
+
+Issue 2: Export diff failing due to floating-point precision
+  Early on we considered storing lat/lon as doubles. Test diffs
+  showed rounding mismatches. Resolved by storing them as strings.
+
+Issue 3: Lookup table realloc off-by-one
+  findOrAddToTable needs space for the new entry plus a NULL
+  sentinel. We initially forgot the +1 in the realloc size, causing
+  out-of-bounds writes. Fixed by allocating (newSize + 1) slots.
+
+Issue 4: Neighbourhood table uses actual IDs, not sequential codes
+  Unlike the other lookup tables where the array index is the code,
+  neighbourhood IDs come from the CSV (e.g. 4220, 5130). We use
+  parallel arrays and linear search by ID. This is acceptable
+  because the number of unique neighbourhoods is small relative to
+  the total record count.
+
+Issue 5: freeDB memory management
+  With many small allocations (every string in every entry, plus
+  lookup table strings), we needed to carefully free everything in
+  reverse order: entry strings first, then the entries array, then
+  lookup table strings, then the lookup arrays, then the table
+  structs, then Db itself. Missing any layer would cause leaks
+  visible under valgrind.
