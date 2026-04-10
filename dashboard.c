@@ -32,6 +32,7 @@ int main(int argc, char *argv[]){
             exit(EXIT_FAILURE);
         }
         importDB(argv[2]);
+        fclose(in_file);
     } else if (strcmp(argv[1], "-b") == 0) {
         in_file = fopen(argv[2], "rb");
         if (in_file == NULL) {
@@ -39,6 +40,7 @@ int main(int argc, char *argv[]){
             exit(EXIT_FAILURE);
         }
         decompressDB(argv[2]);
+        fclose(in_file);
     }
    
     int choice = 0;
@@ -191,7 +193,7 @@ int main(int argc, char *argv[]){
                 compressDB(argv[1]);
                 break;
             case 7:
-                exit(EXIT_SUCCESS);
+                break;
             default:
                 fprintf(stderr, "Invalid choice\n");
                 exit(EXIT_FAILURE);
@@ -199,19 +201,8 @@ int main(int argc, char *argv[]){
 
     }
 
-
-
-   
-
-    
-    
-
-    
-
-
-
-
-    return 0;
+    freeDB();
+    return EXIT_SUCCESS;
 
 }
 

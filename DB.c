@@ -316,3 +316,24 @@ void reportByWard() {
         writeEntryAsCSV(stdout, &Db->picnicTableTable->entries[sortedPicnicTables[i].id]);
     }
 }
+
+void freeDB() {
+    freeTable(&Db->tableTypeTable);
+    freeTable(&Db->surfaceMaterialTable);
+    freeTable(&Db->structuralMaterialTable);
+    for (int i = 0; Db->neighborhoodTable->names[i]; i++) {
+        free(Db->neighborhoodTable->names[i]);
+    }
+    free(Db->neighborhoodTable->names);
+    free(Db->neighborhoodTable->ids);
+    free(Db->neighborhoodTable);
+    for (size_t i = 0; i < Db->picnicTableTable->count; i++) {
+        free(Db->picnicTableTable->entries[i].streetAvenue);
+        free(Db->picnicTableTable->entries[i].ward);
+        free(Db->picnicTableTable->entries[i].latitude);
+        free(Db->picnicTableTable->entries[i].longitude);
+    }
+    free(Db->picnicTableTable->entries);
+    free(Db->picnicTableTable);
+    free(Db);
+}

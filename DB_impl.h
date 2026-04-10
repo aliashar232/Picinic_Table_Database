@@ -57,4 +57,6 @@ void readTable(Table *table, FILE *fp);
 void compressDB(const char *filename);
 void decompressDB(const char *filename);
 
+void freeTable(Table **table);
+
 #endif

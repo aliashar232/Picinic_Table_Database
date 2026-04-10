@@ -244,3 +244,16 @@ void decompressDB(const char *filename) {
     }
     fclose(fp);
 }
+
+void freeTable(Table **table) {
+    if (table) {
+        if (*table) {
+            for (int i = 0; (*table)->types[i]; i++) {
+                free((*table)->types[i]);
+            }
+            free((*table)->types);
+            free(*table);
+        }
+        *table = NULL;
+    }
+}
