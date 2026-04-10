@@ -47,4 +47,4 @@ testing: run_tests
 
 clean:
 	rm -f *.o dashboard tests
-	rm -f testing_strategy/*.o
+	rm -f testing_strategy/*.o run_tests
