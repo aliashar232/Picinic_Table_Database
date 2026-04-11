@@ -1,17 +1,30 @@
 /* DB_impl.c
  *
- * TODO: Provide a high-level description of what is contained
- * in this file.
- *
- * Author: <TODO: Group Member Names>
- * Lab instructor: <TODO: Your lab instructor's name here>
- * Lecture instructor: <TODO: Your lecture instructor's name here>
+ * Description: This file contains the implementation of the database functions declared in DB.h,
+ it also containd implementation of helper functions designed to map string to ids, handling info of neighbourhood,
+ comparison function for sortby function, helper fucntions to write csv and binary file.
+
+ * Author: Ashar, Lyra, Theo
+ * Lab instructor: Dharaben Wagh
+ * Lecture instructor: Dharaben Wagh
  */
 
 #include "DB.h"      /* Import the public database header. */
 #include "DB_impl.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
+/*
+Function: findOrAddToTable
+Description: This helper function will search for a value in the table, if the value sis not found then it
+adds into the table.
+parameters: table points to Table, value
+Pre: Parameters are not null
+Post: value must exist 
+Returns: index of teh value.
+*/
+
 
 int findOrAddToTable(Table *table, char *value) {
     int i = 0;
@@ -67,6 +80,15 @@ COMPARE_BY_TABLE(compareByTableType, tableTypeTable, tableTypeID);
 COMPARE_BY_TABLE(compareBySurfaceMaterial, surfaceMaterialTable, surfaceMaterialID);
 COMPARE_BY_TABLE(compareByStructuralMaterial, structuralMaterialTable, structuralMaterialID);
 
+/*
+Function: compareByNeighborhoodName compareByWard compareStringWithID
+Description: comparison functions used for sorting purposes
+parameters: a and b pointers of elements which are compared
+Pre: valid pointers
+Post: Elements ordered in correct order
+Returns: Negative, zero, or positive value based on order.
+*/
+
 int compareByNeighborhoodName(const void *a, const void *b) {
     const PicnicTableEntry *picnicTable1 = a, *picnicTable2 = b;
     return strcmp(findNeighborhoodName(picnicTable1->neighborhoodID), findNeighborhoodName(picnicTable2->neighborhoodID));
@@ -81,6 +103,15 @@ int compareStringWithID(const void *a, const void *b) {
     const StringWithID *tuple1 = a, *tuple2 = b;
     return strcmp(tuple1->value, tuple2->value);
 }
+
+/*
+Function: writeEntryAsCSV
+Description: This function writes picnic table entry into a csv file.
+parameters: fp as file pointer, entry points to entry in picnic table
+Pre: valid pointers
+Post: Entry is written
+Returns: None.
+*/
 
 void writeEntryAsCSV(FILE *fp, const PicnicTableEntry *entry) {
     char *TableType = Db->tableTypeTable->types[entry->tableTypeID];
@@ -103,6 +134,15 @@ void writeEntryAsCSV(FILE *fp, const PicnicTableEntry *entry) {
     );
 }
 
+/*
+Function: findNeighbourhoodID
+Description: This function find th id with respect to neighbourhood name.
+parameters: neihbourhoodName points to name for searching.
+Pre: valid pointers
+Post: None
+Returns: Neighbourhood id or -1 if not found
+*/
+
 int findNeighborhoodID(const char *neighborhoodName) {
     for (size_t i = 0; Db->neighborhoodTable->names[i] != NULL; i++) {
         if (strcmp(Db->neighborhoodTable->names[i], neighborhoodName) == 0) {
@@ -111,6 +151,15 @@ int findNeighborhoodID(const char *neighborhoodName) {
     }
     return -1;
 }
+
+/*
+Function: findNeighborhoodName
+Description: This function find the name of neighborhood repsect to id.
+parameters: id
+Pre: None
+Post: None
+Returns: Neighbourhood name or null.
+*/
 
 char *findNeighborhoodName(int id) {
     for (size_t i = 0; Db->neighborhoodTable->ids[i] != -1; i++) {
@@ -121,6 +170,15 @@ char *findNeighborhoodName(int id) {
     return NULL;
 }
 
+/*
+Function: writeString
+Description: This function writes the string to binary file.
+parameters: str, fp
+Pre: valid pointers
+Post: string is written to file.
+Returns: None
+*/
+
 void writeString(const char *str, FILE *fp) {
     if (!str) {
         fwrite("\0", sizeof(unsigned char), 1, fp);
@@ -130,6 +188,15 @@ void writeString(const char *str, FILE *fp) {
     fwrite(&length, sizeof(unsigned char), 1, fp);
     fwrite(str, 1, length, fp);
 }
+
+/*
+Function: writeTable
+Description: This function write table of strings.
+parameters: table, fp
+Pre: valid pointers
+Post: table is written to file
+Returns: None
+*/
 
 void writeTable(const Table *table, FILE *fp) {
     long lengthOffset = ftell(fp);
@@ -145,6 +212,15 @@ void writeTable(const Table *table, FILE *fp) {
     fseek(fp, endOffset, SEEK_SET);
 }
 
+/*
+Function: readString
+Description: This function reads a string form binary file.
+parameters: fp
+Pre: valid pointers
+Post: string is read
+Returns: allocates string
+*/
+
 char* readString(FILE *fp) {
     unsigned char length;
     fread(&length, 1, 1, fp);
@@ -155,6 +231,15 @@ char* readString(FILE *fp) {
     return readStr;
 }
 
+/*
+Function: readTable
+Description: This function read string form the table.
+parameters: table, fp
+Pre: valid pointers
+Post: table is read
+Returns: None
+*/
+
 void readTable(Table *table, FILE *fp) {
     unsigned short length;
     fread(&length, sizeof(unsigned short), 1, fp);
@@ -164,6 +249,15 @@ void readTable(Table *table, FILE *fp) {
     }
     table->types[length] = NULL;
 }
+
+/*
+Function: compressDB decompressDB
+Description: This function reads and write database to a binary file with an option for compression and decompression. 
+parameters: filename
+Pre: valid pointers
+Post: database is read and written to the file.
+Returns: None
+*/
 
 void compressDB(const char *filename) {
     FILE *fp = fopen(filename, "wb");
@@ -244,6 +338,15 @@ void decompressDB(const char *filename) {
     }
     fclose(fp);
 }
+
+/*
+Function: freeTable
+Description: This function Frees the memory of the allocated table.
+parameters: table
+Pre: valid pointers
+Post: Memory is freed
+Returns: None
+*/
 
 void freeTable(Table **table) {
     if (table) {

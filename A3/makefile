@@ -48,3 +48,6 @@ testing: run_tests
 clean:
 	rm -f *.o dashboard tests
 	rm -f testing_strategy/*.o run_tests
+
+tar:
+	tar -czvf assignment3.tar.gz *.c *.h makefile testing_strategy/

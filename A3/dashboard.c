@@ -1,12 +1,12 @@
 /*
  * dashboard.c
  *
- * TODO: Provide a high-level description of what is contained
- * in this file.
+ * Description: This file contains implementation of main dashboard which has many options given to user
+ Each option calls function form db.c to return successfull output.
  *
- * Author: <TODO: Group Member Names>
- * Lab instructor: <TODO: Your lab instructor's name here>
- * Lecture instructor: <TODO: Your lecture instructor's name here>
+ * Author: Ashar, Lyra, Theo
+ * Lab instructor: Dharaben Wagh
+ * Lecture instructor: Dharaben Wagh
 */
 
 //You may include other original headers as you see fit
@@ -15,6 +15,16 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+/*
+Function: main
+Description: Initializes the database, loads data from csv file, provides option for users;
+such as export, import, sort, count, compressed, report, edit.
+parameters: argc argv
+Pre: program is run with -c or -b with a filename
+Post: all options are exectued with user commands.
+Returns: EXIT_SUCCESS
+*/
 
 
 int main(int argc, char *argv[]){

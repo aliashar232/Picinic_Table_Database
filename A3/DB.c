@@ -1,11 +1,14 @@
 /* DB.c
  *
- * TODO: Provide a high-level description of what is contained
- * in this file.
+ * Description: This file contains the implementation of the database functions declared in DB.h.
+ his program creates a database with initialized tables, imports the data from a csv file, 
+ count the number of entries for specific member chosen by user, sorts the database according to the user,
+ edits the table entry according to the user, stdout reports by neighbourhood and ward, and finally frees
+ the database from the memory.
  *
- * Author: <TODO: Group Member Names>
- * Lab instructor: <TODO: Your lab instructor's name here>
- * Lecture instructor: <TODO: Your lecture instructor's name here>
+ * Author: Ashar, Lyra, Theo
+ * Lab instructor: Dharaben Wagh
+ * Lecture instructor: Dharaben Wagh
  */
 #include <string.h>
 #include <stdio.h>
@@ -14,7 +17,14 @@
 #include "DB_impl.h"  /* Import the private database header */
 
 DataBase *Db;
-
+/*
+Function: DB_create
+Description: Initializes the database, general table and internal arrays to store the data.
+parameters: None
+Pre: None
+Post: Initailized database.
+Returns: None
+*/
 void DB_create() {
     //Error checking for malloc of Db.
     Db = malloc(sizeof(DataBase));
@@ -75,6 +85,17 @@ void DB_create() {
     }
 }
 
+/*
+Function: countEntries
+Description: This function will count the number of entries for specif member that is chosen by user, members
+can be "Table Type", "Surface Material", "Structural Material", "Neighborhood ID", "Neighborhood Name", and "Ward".
+value is the value of the member that user wants to count.
+parameters: memberName, value.
+Pre: None
+Post: count for specific member.
+Returns: int count of entries.
+*/
+
 int countEntries(char *memberName, char * value){
     int count = 0;
     int targetID = -1;
@@ -123,6 +144,16 @@ int countEntries(char *memberName, char * value){
     }
     return count;
 }
+
+/*
+Function: importDB
+Description: This function will import the data from a csv file, and stoe the data into databse, 
+it will also resize the database if memory is full.
+parameters: filename of the csv file to import.
+Pre: None
+Post: database is imported.
+Returns: None
+*/
 
 void importDB(const char *filename) {
     FILE *fp = fopen(filename, "r");
@@ -237,6 +268,15 @@ void importDB(const char *filename) {
     fclose(fp);
 }
 
+/*
+Function: exportDB
+Description: This function will export the database from a csv file and outputs the data into a csv file.
+parameters: filename of the csv file to export.
+Pre: None
+Post: database is exported.
+Returns: None
+*/
+
 void exportDB(const char *filename) {
     FILE *fp = fopen(filename, "w");
     if (fp == NULL) {
@@ -254,6 +294,16 @@ void exportDB(const char *filename) {
     fclose(fp);
 }
 
+/*
+Function: sortByMember
+Description: This function will sort the entries according to the memebr chosen by user, it will output
+the table using qsort function which contains a comparator as well.
+parameters: memberName
+Pre: None
+Post: sorted database
+Returns: None
+*/
+
 void sortByMember(char *memberName) {
     if (strcmp(memberName, "Table Type") == 0) {
         qsort(Db->picnicTableTable->entries, Db->picnicTableTable->count, sizeof(PicnicTableEntry), compareByTableType);
@@ -268,6 +318,16 @@ void sortByMember(char *memberName) {
     }
 }
 
+/*
+Function: editTableEntry
+Description: This function will edit the table entry according to the user, it will first look for tableID,
+then it will lok for memebr name and then finally updates the value of the mmeber accordingly.
+parameters: tableID, memberName, value.
+Pre: None
+Post: updated table entry.
+Returns: None
+*/
+
 void editTableEntry(int tableID, char *memberName, char *value) {
     PicnicTableEntry *entry = &Db->picnicTableTable->entries[tableID];
     if (strcmp(memberName, "Table Type") == 0) {
@@ -278,6 +338,17 @@ void editTableEntry(int tableID, char *memberName, char *value) {
         entry->structuralMaterialID = findOrAddToTable(Db->structuralMaterialTable, value);
     }
 }
+
+/*
+Function: reportByWard reportByNeighbourhood
+Description: These functions will report the tables by ward and neighbourhood,
+it will look for ward and neighbourhood name from each entry and then sort the table according
+to the wards ad neighbourhood, then it will print the report by ward and neighbourhood respectively.
+parameters: None
+Pre: None
+Post: report by ward and neighbourhood.
+Returns: None
+*/
 
 void reportByNeighbourhood() {
     // store each picnic table along with its ward
@@ -316,6 +387,15 @@ void reportByWard() {
         writeEntryAsCSV(stdout, &Db->picnicTableTable->entries[sortedPicnicTables[i].id]);
     }
 }
+
+/*
+Function: freeDB
+Description: This function will free all the memory allocated for the database.
+parameters: None
+Pre: None
+Post: database is freed.
+Returns: None
+*/
 
 void freeDB() {
     freeTable(&Db->tableTypeTable);
