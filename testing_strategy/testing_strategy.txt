@@ -1,0 +1,61 @@
+Introduction:
+This document contains the Testing strategy of the database. The goal is to ensure correctness, robustness, intervative and automated testing
+of the databse.
+
+Testing is done in two parts:
+The test for edit_table_entry, exportdb, importdb and count entries was done through tests.csv file in which a pass or fail is declared
+in testing helper functions. For sorted, reports, i have exported the output file and did use diff to see if there is any difference
+in expected _output_file that i have created vs the databse has created.
+
+Organization:
+Testing_startegy/contains all the expected_output file for each function so it can be differed in makefile testing when i import
+the exported files of testing cases fucntions.
+
+Automated Testing:
+The testing is automated through makefile.
+The makefile compiles the tests.c, runs all test fucntions, prints pass/fail, Diff the expected vs output and also displays both
+reports by Neighbourhood and Ward.
+
+Command:
+make testing ->> compiles tests.c, output pass/fail on each test, use diff, and prints both reports.
+make all ->> compiles dahboard and ask the options interactively and performa each function according to the user.
+
+Test Cases:
+
+DB_CREATION:
+It verifies if the database is initialized as NULL.
+
+Import_database:
+loads database from a csv file.
+it passes if count > 0;
+
+Export_databse:
+exports the database from a csv file.
+it passes by using diff in makefile.
+
+Count_entries:
+Count the number of times the attributes occurs.
+prints pass/fail in tests.c if expected is equal to input.
+
+Sort_by_member:
+Sorts the database entries by field chosen by the user.
+Verified using diff comparison in makefile.
+
+Edit_table_entry;
+Changes value of a certain field in an entry.
+Verified using diff comparison in makefile.
+
+Reporting function:
+This would print the stdout of both report by Ward and report by Neighbourhood
+It is verfied using diff in makefile.
+
+Test.csv:
+only firts 10 entries were used to test all of this, not a huge database.
+also checked erron handling on wrong files and memory allocations.
+
+Conclusion: 
+This testing strategy ensures that both manual testing and automated testing in makefile is completed. The use of diff in makefile,
+ensures the expected and generate doutput by tests.c files are same to get passed.
+
+
+
