@@ -7,8 +7,6 @@
  the database from the memory.
  *
  * Author: Ashar, Lyra, Theo
- * Lab instructor: Dharaben Wagh
- * Lecture instructor: Dharaben Wagh
  */
 #include <string.h>
 #include <stdio.h>
